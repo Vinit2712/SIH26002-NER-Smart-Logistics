@@ -1,3 +1,54 @@
+Project Structure :
+## Project Structure
+
+```
+riskroute/
+├── public/                      # Static assets
+├── src/
+│   ├── assets/                  # Images, icons used in the app
+│   │
+│   ├── components/              # Reusable UI components
+│   │   ├── Sidebar.jsx          # Left navigation (Dashboard/Map/Routes/Logistics/Alerts)
+│   │   ├── Header.jsx           # Top bar with platform name + live status
+│   │   ├── StatCard.jsx         # Summary metric card (used on Dashboard)
+│   │   ├── RiskBadge.jsx        # Colored risk-level badge (accessible/at-risk/inaccessible)
+│   │   ├── StatusIndicator.jsx  # Colored dot + label for delivery status
+│   │   ├── MapView.jsx          # Leaflet map — roads, vehicles, risk color-coding
+│   │   ├── RouteCard.jsx        # Recommended/alternative route display card
+│   │   ├── VehicleTable.jsx     # Logistics vehicle status table
+│   │   └── AlertPanel.jsx       # Alerts list with severity + description
+│   │
+│   ├── pages/                   # Route-level pages (mapped via react-router-dom)
+│   │   ├── Dashboard.jsx        # Command-center overview
+│   │   ├── MapPage.jsx          # Full-screen live risk map
+│   │   ├── Routes.jsx           # Route Intelligence (origin/destination planner)
+│   │   ├── Logistics.jsx        # Full vehicle logistics table
+│   │   └── Alerts.jsx           # Full alerts panel
+│   │
+│   ├── mockData/                # Centralized mock data (no hardcoding in components)
+│   │   ├── districts.js         # District list + accessibility status
+│   │   ├── roads.js             # Road network with risk status + coordinates
+│   │   ├── routes.js            # Recommended vs alternative route data
+│   │   ├── vehicles.js          # Vehicle fleet status + coordinates
+│   │   ├── alerts.js            # Active alerts (severity, location, description)
+│   │   └── risks.js             # AI/ML-predicted risk records per road
+│   │
+│   ├── services/
+│   │   └── api.js               # Service layer — returns mock data now,
+│   │                             #   structured to swap in real backend calls later
+│   │
+│   ├── App.jsx                  # Root component — layout + routing setup
+│   ├── App.css
+│   ├── index.css                # Tailwind entry point
+│   └── main.jsx                 # React app entry point
+│
+├── index.html
+├── package.json
+├── vite.config.js
+├── .gitignore
+└── README.md
+```
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
