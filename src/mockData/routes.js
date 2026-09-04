@@ -1,0 +1,62 @@
+export const routes = [
+  {
+    id: "route1",
+    origin: "Siliguri",
+    destination: "Gangtok",
+    recommended: {
+      roadName: "NH-10",
+      distanceKm: 114,
+      etaMinutes: 210,
+      riskLevel: "high",
+      delayMinutes: 42,
+    },
+    alternative: {
+      roadName: "Route via Kalimpong (SH-12)",
+      distanceKm: 128,
+      etaMinutes: 195,
+      riskLevel: "low",
+      delayMinutes: 18,
+      reason: "Bypasses the landslide-affected NH-10 stretch entirely, avoids current rainfall zone",
+    },
+  },
+  {
+    id: "route2",
+    origin: "Imphal",
+    destination: "Dimapur",
+    recommended: {
+      roadName: "NH-702",
+      distanceKm: 215,
+      etaMinutes: 360,
+      riskLevel: "critical",
+      delayMinutes: 999,
+    },
+    alternative: {
+      roadName: "Route via Kohima (NH-2 + NH-29)",
+      distanceKm: 268,
+      etaMinutes: 420,
+      riskLevel: "medium",
+      delayMinutes: 65,
+      reason: "Only viable route with the direct NH-702 corridor fully blocked",
+    },
+  },
+  {
+    id: "route3",
+    origin: "Guwahati",
+    destination: "Shillong",
+    recommended: {
+      roadName: "NH-2",
+      distanceKm: 100,
+      etaMinutes: 150,
+      riskLevel: "low",
+      delayMinutes: 5,
+    },
+    alternative: {
+      roadName: "Route via Nongpoh (SH-5)",
+      distanceKm: 112,
+      etaMinutes: 165,
+      riskLevel: "low",
+      delayMinutes: 10,
+      reason: "Slightly longer, kept as backup in case of NH-2 congestion",
+    },
+  },
+];
