@@ -1,0 +1,50 @@
+{
+  "HEAVY_CARGO_TRUCK": {
+    "class_name": "Heavy Multi-Axle Freight Truck (16-Wheeler)",
+    "payload_capacity_tons": 25.0,
+    "base_plains_speed_kmh": 55,
+    "base_hills_speed_kmh": 28,
+    "max_slope_gradient_pct": 12.0,
+    "max_wind_speed_kmh": 45,
+    "rain_slowdown_factor": 0.35,
+    "risk_tolerance_threshold": 0.45,
+    "eligible_for_restricted_bridges": false,
+    "description": "Standard heavy long-haul logistics truck. Strictly avoids steep slopes >12% and critical landslide roads."
+  },
+  "MEDIUM_COMMERCIAL_VEHICLE": {
+    "class_name": "Medium Commercial Truck (Eicher / Tata 6-Wheeler)",
+    "payload_capacity_tons": 9.5,
+    "base_plains_speed_kmh": 65,
+    "base_hills_speed_kmh": 36,
+    "max_slope_gradient_pct": 18.0,
+    "max_wind_speed_kmh": 55,
+    "rain_slowdown_factor": 0.25,
+    "risk_tolerance_threshold": 0.65,
+    "eligible_for_restricted_bridges": true,
+    "description": "Primary regional distribution vehicle. Agile on mountain switchbacks, moderate slope resistance."
+  },
+  "LIGHT_4X4_SUPPLY_PICKUP": {
+    "class_name": "Light 4x4 All-Terrain Utility (Mahindra Bolero / Isuzu 4WD)",
+    "payload_capacity_tons": 2.2,
+    "base_plains_speed_kmh": 75,
+    "base_hills_speed_kmh": 48,
+    "max_slope_gradient_pct": 28.0,
+    "max_wind_speed_kmh": 70,
+    "rain_slowdown_factor": 0.15,
+    "risk_tolerance_threshold": 0.85,
+    "eligible_for_restricted_bridges": true,
+    "description": "Last-mile mountain lifeline vehicle. Can navigate mild mudslides, unpaved cuts, and steep slopes."
+  },
+  "EMERGENCY_DISASTER_RELIEF_VAN": {
+    "class_name": "Priority Emergency Relief & Medical Transport",
+    "payload_capacity_tons": 1.5,
+    "base_plains_speed_kmh": 85,
+    "base_hills_speed_kmh": 55,
+    "max_slope_gradient_pct": 25.0,
+    "max_wind_speed_kmh": 65,
+    "rain_slowdown_factor": 0.1,
+    "risk_tolerance_threshold": 0.9,
+    "eligible_for_restricted_bridges": true,
+    "description": "Priority emergency cargo (medicines, rescue gear). Highest speed priority, authorized for restricted passes."
+  }
+}
