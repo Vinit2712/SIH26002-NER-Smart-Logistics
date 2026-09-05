@@ -1,5 +1,5 @@
-Project Structure :
-## Project Structure
+Frontend Structure :
+
 
 ```
 riskroute/
@@ -7,40 +7,51 @@ riskroute/
 ├── src/
 │   ├── assets/                  # Images, icons used in the app
 │   │
+│   ├── context/                 # Shared app-wide state (React Context)
+│   │   ├── AuthContext.jsx      # Login state + role (supplier/admin), mock credential checks
+│   │   ├── AlertsContext.jsx    # Shared live alerts store (Emergency button → Admin Alerts)
+│   │   └── VehiclesContext.jsx  # Shared live vehicle store (Supplier route changes → Admin views)
+│   │
 │   ├── components/              # Reusable UI components
-│   │   ├── Sidebar.jsx          # Left navigation (Dashboard/Map/Routes/Logistics/Alerts)
-│   │   ├── Header.jsx           # Top bar with platform name + live status
-│   │   ├── StatCard.jsx         # Summary metric card (used on Dashboard)
+│   │   ├── Sidebar.jsx          # Admin navigation (Dashboard/Map/Routes/Logistics/Alerts/Register Vehicle)
+│   │   ├── Header.jsx           # Top bar — platform name, live status, logged-in user, logout
+│   │   ├── ProtectedRoute.jsx   # Route guard — restricts pages by role (supplier/admin)
+│   │   ├── StatCard.jsx         # Summary metric card (used on Admin Dashboard)
 │   │   ├── RiskBadge.jsx        # Colored risk-level badge (accessible/at-risk/inaccessible)
 │   │   ├── StatusIndicator.jsx  # Colored dot + label for delivery status
-│   │   ├── MapView.jsx          # Leaflet map — roads, vehicles, risk color-coding
-│   │   ├── RouteCard.jsx        # Recommended/alternative route display card
-│   │   ├── VehicleTable.jsx     # Logistics vehicle status table
-│   │   └── AlertPanel.jsx       # Alerts list with severity + description
+│   │   ├── MapView.jsx          # Leaflet map — supports "region" mode (Admin) and "driver" mode (Supplier)
+│   │   ├── RouteCard.jsx        # Route option card — selectable on Supplier side, read-only on Admin side
+│   │   ├── VehicleTable.jsx     # Logistics vehicle status table (Admin)
+│   │   └── AlertPanel.jsx       # Alerts list with severity + description (Admin)
 │   │
 │   ├── pages/                   # Route-level pages (mapped via react-router-dom)
-│   │   ├── Dashboard.jsx        # Command-center overview
-│   │   ├── MapPage.jsx          # Full-screen live risk map
-│   │   ├── Routes.jsx           # Route Intelligence (origin/destination planner)
-│   │   ├── Logistics.jsx        # Full vehicle logistics table
-│   │   └── Alerts.jsx           # Full alerts panel
+│   │   ├── Login.jsx            # Role-based login — Supplier (Vehicle ID) or Admin (username)
+│   │   ├── Dashboard.jsx        # Admin command-center overview
+│   │   ├── MapPage.jsx          # Admin full-screen live risk map
+│   │   ├── Routes.jsx           # Admin Route Intelligence (origin/destination planner)
+│   │   ├── Logistics.jsx        # Admin full vehicle logistics table
+│   │   ├── Alerts.jsx           # Admin full alerts panel
+│   │   ├── RegisterVehicle.jsx  # Admin — onboard a new vehicle + issue supplier login
+│   │   └── DriverDashboard.jsx  # Supplier dashboard — select route, view risk/ETA, emergency alert
 │   │
 │   ├── mockData/                # Centralized mock data (no hardcoding in components)
 │   │   ├── districts.js         # District list + accessibility status
 │   │   ├── roads.js             # Road network with risk status + coordinates
-│   │   ├── routes.js            # Recommended vs alternative route data
-│   │   ├── vehicles.js          # Vehicle fleet status + coordinates
-│   │   ├── alerts.js            # Active alerts (severity, location, description)
-│   │   └── risks.js             # AI/ML-predicted risk records per road
+│   │   ├── routes.js            # Route options per origin/destination (with risk score + reasons)
+│   │   ├── vehicles.js          # Initial vehicle fleet (seed data for VehiclesContext)
+│   │   ├── alerts.js            # Initial alerts (seed data for AlertsContext)
+│   │   ├── risks.js             # AI/ML-predicted risk records per road
+│   │   ├── credentials.js       # Hardcoded mock login credentials (supplier + admin)
+│   │   └── locations.js         # Known locations + coordinates for route selection
 │   │
 │   ├── services/
 │   │   └── api.js               # Service layer — returns mock data now,
 │   │                             #   structured to swap in real backend calls later
 │   │
-│   ├── App.jsx                  # Root component — layout + routing setup
+│   ├── App.jsx                  # Root component — routing, role-based layouts, route protection
 │   ├── App.css
-│   ├── index.css                # Tailwind entry point
-│   └── main.jsx                 # React app entry point
+│   ├── index.css                # Tailwind entry point + print styles (for route download)
+│   └── main.jsx                 # React app entry point — wraps app with Auth/Alerts/Vehicles providers
 │
 ├── index.html
 ├── package.json
