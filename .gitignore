@@ -1,0 +1,3 @@
+﻿*.aux.xml
+__pycache__/
+*.tmp
