@@ -1,19 +1,8 @@
-import { useEffect, useState } from "react";
 import VehicleTable from "../components/VehicleTable";
-import { getVehicles } from "../services/api";
+import { useVehicles } from "../context/VehiclesContext";
 
 function Logistics() {
-  const [vehicles, setVehicles] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadData() {
-      const v = await getVehicles();
-      setVehicles(v);
-      setLoading(false);
-    }
-    loadData();
-  }, []);
+  const { vehicles, loading } = useVehicles();
 
   if (loading) {
     return <p className="text-slate-500 text-sm">Loading logistics data...</p>;

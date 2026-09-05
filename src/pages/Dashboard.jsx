@@ -12,33 +12,31 @@ import StatCard from "../components/StatCard";
 import RiskBadge from "../components/RiskBadge";
 import StatusIndicator from "../components/StatusIndicator";
 import MapView from "../components/MapView";
-import { getDistricts, getRoads, getVehicles, getAlerts } from "../services/api";
+import { getDistricts, getRoads } from "../services/api";
+import { useAlerts } from "../context/AlertsContext";
+import { useVehicles } from "../context/VehiclesContext";
 
 function Dashboard() {
   const [districts, setDistricts] = useState([]);
   const [roads, setRoads] = useState([]);
-  const [vehicles, setVehicles] = useState([]);
-  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { alerts, loading: alertsLoading } = useAlerts();
+  const { vehicles, loading: vehiclesLoading } = useVehicles();
 
   useEffect(() => {
     async function loadData() {
-      const [d, r, v, a] = await Promise.all([
+      const [d, r] = await Promise.all([
         getDistricts(),
         getRoads(),
-        getVehicles(),
-        getAlerts(),
       ]);
       setDistricts(d);
       setRoads(r);
-      setVehicles(v);
-      setAlerts(a);
       setLoading(false);
     }
     loadData();
   }, []);
 
-  if (loading) {
+  if (loading || alertsLoading || vehiclesLoading) {
     return <p className="text-slate-500 text-sm">Loading dashboard...</p>;
   }
 

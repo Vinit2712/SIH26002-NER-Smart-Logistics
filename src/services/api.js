@@ -38,10 +38,8 @@ export async function getRoutes() {
   return mockRequest(routes);
 }
 
-export async function getRouteByOriginDestination(origin, destination) {
-  const match = routes.find(
-    (r) => r.origin === origin && r.destination === destination
-  );
+export async function getRouteByVehicleId(vehicleId) {
+  const match = routes.find((r) => r.vehicleId === vehicleId);
   return mockRequest(match || null);
 }
 

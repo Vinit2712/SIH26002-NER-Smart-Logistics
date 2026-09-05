@@ -1,19 +1,8 @@
-import { useEffect, useState } from "react";
 import AlertPanel from "../components/AlertPanel";
-import { getAlerts } from "../services/api";
+import { useAlerts } from "../context/AlertsContext";
 
 function Alerts() {
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadData() {
-      const a = await getAlerts();
-      setAlerts(a);
-      setLoading(false);
-    }
-    loadData();
-  }, []);
+  const { alerts, loading } = useAlerts();
 
   if (loading) {
     return <p className="text-slate-500 text-sm">Loading alerts...</p>;

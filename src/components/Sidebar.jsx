@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Map, Route, Truck, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, Map, Route, Truck, AlertTriangle, UserPlus } from "lucide-react";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: "/routes", label: "Routes", icon: Route },
   { to: "/logistics", label: "Logistics", icon: Truck },
   { to: "/alerts", label: "Alerts", icon: AlertTriangle },
+  { to: "/register-vehicle", label: "Register Vehicle", icon: UserPlus },
 ];
 
 function Sidebar() {
