@@ -1,0 +1,11 @@
+state,region,annual_normal_mm,monsoon_daily_mean_mm,moderate_threshold_24h_mm,high_threshold_24h_mm,extreme_threshold_24h_mm
+Meghalaya,Khasi & Jaintia Hills,2818,18.5,35.0,65.0,120.0
+Assam,Dima Hasao & Karbi Anglong,1780,12.0,25.0,50.0,90.0
+Assam,Brahmaputra Valley,1950,14.2,30.0,55.0,100.0
+Arunachal Pradesh,West Kameng & Tawang,2100,15.0,30.0,60.0,110.0
+Arunachal Pradesh,Siang & Lohit Valleys,3200,22.0,40.0,75.0,135.0
+Sikkim,East & North Sikkim,2739,19.8,35.0,70.0,125.0
+Manipur,Senapati & Tamenglong,1600,11.5,25.0,50.0,85.0
+Mizoram,Aizawl & Kolasib Ridges,2150,16.0,30.0,60.0,105.0
+Nagaland,Kohima & Mokokchung,1800,13.0,25.0,50.0,90.0
+Tripura,Dhalai & North Tripura,2200,15.5,30.0,55.0,95.0

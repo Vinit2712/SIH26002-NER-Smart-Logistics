@@ -1,0 +1,92 @@
+[
+  {
+    "state": "Meghalaya",
+    "region": "Khasi & Jaintia Hills",
+    "annual_normal_mm": 2818,
+    "monsoon_daily_mean_mm": 18.5,
+    "moderate_threshold_24h_mm": 35.0,
+    "high_threshold_24h_mm": 65.0,
+    "extreme_threshold_24h_mm": 120.0
+  },
+  {
+    "state": "Assam",
+    "region": "Dima Hasao & Karbi Anglong",
+    "annual_normal_mm": 1780,
+    "monsoon_daily_mean_mm": 12.0,
+    "moderate_threshold_24h_mm": 25.0,
+    "high_threshold_24h_mm": 50.0,
+    "extreme_threshold_24h_mm": 90.0
+  },
+  {
+    "state": "Assam",
+    "region": "Brahmaputra Valley",
+    "annual_normal_mm": 1950,
+    "monsoon_daily_mean_mm": 14.2,
+    "moderate_threshold_24h_mm": 30.0,
+    "high_threshold_24h_mm": 55.0,
+    "extreme_threshold_24h_mm": 100.0
+  },
+  {
+    "state": "Arunachal Pradesh",
+    "region": "West Kameng & Tawang",
+    "annual_normal_mm": 2100,
+    "monsoon_daily_mean_mm": 15.0,
+    "moderate_threshold_24h_mm": 30.0,
+    "high_threshold_24h_mm": 60.0,
+    "extreme_threshold_24h_mm": 110.0
+  },
+  {
+    "state": "Arunachal Pradesh",
+    "region": "Siang & Lohit Valleys",
+    "annual_normal_mm": 3200,
+    "monsoon_daily_mean_mm": 22.0,
+    "moderate_threshold_24h_mm": 40.0,
+    "high_threshold_24h_mm": 75.0,
+    "extreme_threshold_24h_mm": 135.0
+  },
+  {
+    "state": "Sikkim",
+    "region": "East & North Sikkim",
+    "annual_normal_mm": 2739,
+    "monsoon_daily_mean_mm": 19.8,
+    "moderate_threshold_24h_mm": 35.0,
+    "high_threshold_24h_mm": 70.0,
+    "extreme_threshold_24h_mm": 125.0
+  },
+  {
+    "state": "Manipur",
+    "region": "Senapati & Tamenglong",
+    "annual_normal_mm": 1600,
+    "monsoon_daily_mean_mm": 11.5,
+    "moderate_threshold_24h_mm": 25.0,
+    "high_threshold_24h_mm": 50.0,
+    "extreme_threshold_24h_mm": 85.0
+  },
+  {
+    "state": "Mizoram",
+    "region": "Aizawl & Kolasib Ridges",
+    "annual_normal_mm": 2150,
+    "monsoon_daily_mean_mm": 16.0,
+    "moderate_threshold_24h_mm": 30.0,
+    "high_threshold_24h_mm": 60.0,
+    "extreme_threshold_24h_mm": 105.0
+  },
+  {
+    "state": "Nagaland",
+    "region": "Kohima & Mokokchung",
+    "annual_normal_mm": 1800,
+    "monsoon_daily_mean_mm": 13.0,
+    "moderate_threshold_24h_mm": 25.0,
+    "high_threshold_24h_mm": 50.0,
+    "extreme_threshold_24h_mm": 90.0
+  },
+  {
+    "state": "Tripura",
+    "region": "Dhalai & North Tripura",
+    "annual_normal_mm": 2200,
+    "monsoon_daily_mean_mm": 15.5,
+    "moderate_threshold_24h_mm": 30.0,
+    "high_threshold_24h_mm": 55.0,
+    "extreme_threshold_24h_mm": 95.0
+  }
+]
