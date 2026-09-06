@@ -2,6 +2,7 @@ import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from "
 import { useEffect } from "react";
 import { roads as mockRoads } from "../mockData/roads";
 import { useVehicles } from "../context/VehiclesContext";
+import { smoothPath } from "../utils/geo";
 
 // ---- GIS MAP LAYER ----
 // Two modes:
@@ -74,7 +75,7 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
               return (
                 <Polyline
                   key={option.id}
-                  positions={option.coordinates}
+                  positions={smoothPath(option.coordinates)}
                   pathOptions={{
                     color: isSelected ? (ROUTE_RISK_COLORS[option.riskLevel] || "#1d4ed8") : "#94a3b8",
                     weight: isSelected ? 6 : 3,
@@ -110,7 +111,7 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
             {mockRoads.map((road) => (
               <Polyline
                 key={road.id}
-                positions={road.coordinates}
+                positions={smoothPath(road.coordinates)}
                 pathOptions={{
                   color: STATUS_COLORS[road.status] || "#94a3b8",
                   weight: 5,
@@ -133,8 +134,8 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
               </Polyline>
             ))}
 
-            {/* Region mode: all vehicles */}
-            {liveVehicles.map((v) => (
+                        {/* Region mode: all vehicles (skip any that haven't picked a route yet) */}
+            {liveVehicles.filter((v) => v.coordinates).map((v) => (
               <CircleMarker
                 key={v.id}
                 center={v.coordinates}

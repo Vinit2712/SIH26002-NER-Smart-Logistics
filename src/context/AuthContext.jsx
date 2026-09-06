@@ -1,12 +1,31 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { driverCredentials as initialDriverCredentials, govtCredentials } from "../mockData/credentials";
 
 const AuthContext = createContext(null);
+const STORAGE_KEY = "riskroute_driver_credentials";
+
+function loadStoredCredentials() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : initialDriverCredentials;
+  } catch {
+    return initialDriverCredentials;
+  }
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [driverCredentials, setDriverCredentials] = useState(initialDriverCredentials);
-  // user shape: { role: "driver", vehicleId: "V-101" } or { role: "govt", username: "admin" }
+  const [driverCredentials, setDriverCredentials] = useState(loadStoredCredentials);
+
+  useEffect(() => {
+    function handleStorageChange(e) {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        setDriverCredentials(JSON.parse(e.newValue));
+      }
+    }
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   function loginDriver(vehicleId, password) {
     const match = driverCredentials.find(
@@ -34,11 +53,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  // Called by Admin when registering a new vehicle — issues login credentials for it.
   function registerDriverCredential(vehicleId, password) {
     const exists = driverCredentials.some((d) => d.vehicleId === vehicleId);
     if (exists) return false;
-    setDriverCredentials((prev) => [...prev, { vehicleId, password }]);
+    const updated = [...driverCredentials, { vehicleId, password }];
+    setDriverCredentials(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     return true;
   }
 

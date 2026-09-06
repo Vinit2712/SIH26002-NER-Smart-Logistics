@@ -1,6 +1,5 @@
 // Known locations with coordinates — used for the Supplier's origin/destination selector.
 // Keeping this list in sync with what appears in routes.js origins/destinations.
-
 export const knownLocations = [
   { name: "Siliguri", coordinates: [26.727, 88.393] },
   { name: "Gangtok", coordinates: [27.331, 88.612] },

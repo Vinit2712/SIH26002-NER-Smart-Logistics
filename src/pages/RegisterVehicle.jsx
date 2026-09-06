@@ -2,7 +2,6 @@ import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useVehicles } from "../context/VehiclesContext";
-import { knownLocations } from "../mockData/locations";
 
 function RegisterVehicle() {
   const { registerDriverCredential } = useAuth();
@@ -10,8 +9,6 @@ function RegisterVehicle() {
 
   const [vehicleId, setVehicleId] = useState("");
   const [password, setPassword] = useState("");
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
   const [commodity, setCommodity] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -21,12 +18,8 @@ function RegisterVehicle() {
     setError("");
     setSuccess(false);
 
-    if (!vehicleId.trim() || !password.trim() || !origin || !destination || !commodity.trim()) {
+    if (!vehicleId.trim() || !password.trim() || !commodity.trim()) {
       setError("Please fill in all fields.");
-      return;
-    }
-    if (origin === destination) {
-      setError("Origin and destination must be different.");
       return;
     }
 
@@ -36,14 +29,14 @@ function RegisterVehicle() {
       return;
     }
 
-    const originLoc = knownLocations.find((l) => l.name === origin);
-
+    // Vehicle exists in the system, but with no route yet —
+    // the supplier will choose their own origin/destination on login.
     addVehicle({
       id: vehicleId.trim(),
-      origin,
-      destination,
-      currentLocation: origin,
-      coordinates: originLoc ? originLoc.coordinates : [26.1, 92.0],
+      origin: null,
+      destination: null,
+      currentLocation: "Not yet assigned",
+      coordinates: null,
       commodity: commodity.trim(),
       status: "on_route",
       delayMinutes: 0,
@@ -52,8 +45,6 @@ function RegisterVehicle() {
     setSuccess(true);
     setVehicleId("");
     setPassword("");
-    setOrigin("");
-    setDestination("");
     setCommodity("");
   }
 
@@ -62,7 +53,7 @@ function RegisterVehicle() {
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Register Vehicle</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Onboard a new vehicle and issue supplier login credentials
+          Onboard a new vehicle and issue supplier login credentials. The supplier will choose their own route after logging in.
         </p>
       </div>
 
@@ -89,35 +80,6 @@ function RegisterVehicle() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-medium text-slate-500 uppercase">Origin</label>
-            <select
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-              className="w-full mt-1 border border-slate-300 rounded-sm px-3 py-2 text-sm"
-            >
-              <option value="">Select</option>
-              {knownLocations.map((loc) => (
-                <option key={loc.name} value={loc.name}>{loc.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-slate-500 uppercase">Destination</label>
-            <select
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              className="w-full mt-1 border border-slate-300 rounded-sm px-3 py-2 text-sm"
-            >
-              <option value="">Select</option>
-              {knownLocations.map((loc) => (
-                <option key={loc.name} value={loc.name}>{loc.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
         <div>
           <label className="text-xs font-medium text-slate-500 uppercase">Commodity</label>
           <input
@@ -133,7 +95,7 @@ function RegisterVehicle() {
         {success && (
           <p className="text-sm text-green-600 flex items-center gap-1.5">
             <CheckCircle2 size={16} />
-            Vehicle registered successfully. Driver can now log in.
+            Vehicle registered successfully. Driver can now log in and select their route.
           </p>
         )}
 

@@ -3,7 +3,7 @@ import { AlertOctagon, CheckCircle2, Download, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useAlerts } from "../context/AlertsContext";
 import { useVehicles } from "../context/VehiclesContext";
-import { getRoutes } from "../services/api";
+import { getRouteForPair } from "../services/api";
 import { knownLocations } from "../mockData/locations";
 import RouteCard from "../components/RouteCard";
 import MapView from "../components/MapView";
@@ -13,64 +13,55 @@ function DriverDashboard() {
   const { addAlert } = useAlerts();
   const { vehicles, updateVehicle } = useVehicles();
 
-  const [allRoutes, setAllRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alertSent, setAlertSent] = useState(false);
 
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
-  const [activeRouteSet, setActiveRouteSet] = useState(null); // the {recommended, alternative, alternative2} object
+  const [activeRouteSet, setActiveRouteSet] = useState(null);
   const [selectedRouteId, setSelectedRouteId] = useState(null);
 
   const myVehicle = vehicles.find((v) => v.id === user.vehicleId);
 
   useEffect(() => {
-    async function loadRoutes() {
-      const r = await getRoutes();
-      setAllRoutes(r);
-
-      // Default to this vehicle's current origin/destination if it already has one
-      if (myVehicle) {
-        const existing = r.find(
-          (route) => route.origin === myVehicle.origin && route.destination === myVehicle.destination
-        );
+    async function loadDefaultRoute() {
+      if (myVehicle && myVehicle.origin && myVehicle.destination) {
+        const existing = await getRouteForPair(myVehicle.origin, myVehicle.destination);
         if (existing) {
-          setOrigin(existing.origin);
-          setDestination(existing.destination);
+          setOrigin(myVehicle.origin);
+          setDestination(myVehicle.destination);
           setActiveRouteSet(existing);
           setSelectedRouteId(existing.recommended.id);
         }
       }
       setLoading(false);
     }
-    loadRoutes();
+    loadDefaultRoute();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleFindRoute() {
-    const match = allRoutes.find(
-      (r) => r.origin === origin && r.destination === destination
-    );
-    if (match) {
-      setActiveRouteSet(match);
-      setSelectedRouteId(match.recommended.id);
+  async function handleFindRoute() {
+    const result = await getRouteForPair(origin, destination);
+    if (result) {
+      setActiveRouteSet(result);
+      setSelectedRouteId(result.recommended.id);
     } else {
       setActiveRouteSet(null);
       setSelectedRouteId(null);
     }
   }
-
   function handleSelectRoute(option) {
+    console.log("Route card clicked. user.vehicleId:", user.vehicleId, "origin:", origin, "destination:", destination);
     setSelectedRouteId(option.id);
-    // Push the update live to Admin side
     updateVehicle(user.vehicleId, {
       origin,
       destination,
-      currentLocation: origin, // reset to starting point on a new route selection
+      currentLocation: origin,
       coordinates: option.coordinates[0],
       status: option.riskLevel === "critical" || option.riskLevel === "high" ? "at_risk" : "on_route",
       delayMinutes: option.delayMinutes,
     });
+    console.log("updateVehicle called");
   }
 
   function handleEmergency() {
