@@ -1,14 +1,19 @@
 import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from "react-leaflet";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { roads as mockRoads } from "../mockData/roads";
 import { useVehicles } from "../context/VehiclesContext";
 import { smoothPath } from "../utils/geo";
+import { fetchRoadPath } from "../services/routing";
 
 // ---- GIS MAP LAYER ----
 // Two modes:
 // "region" (default) — used on Admin Dashboard / Map page: shows ALL roads + ALL vehicles.
 // "driver" — used on Supplier Dashboard: shows ONLY this vehicle's route options
 //            (selected route highlighted, others dimmed), and only this vehicle's marker.
+//
+// Route/road lines are fetched from OSRM's free routing service so they
+// follow real roads. If that request fails (offline, rate-limited), we
+// fall back to a smoothed straight-line approximation.
 
 const STATUS_COLORS = {
   accessible: "#16a34a",
@@ -31,7 +36,6 @@ const NER_BOUNDS = [
 ];
 const MIN_ZOOM = 6;
 
-// Auto-fits the map view to a set of route paths (used in driver mode)
 function FitToRoutes({ routeOptions }) {
   const map = useMap();
   useEffect(() => {
@@ -42,6 +46,43 @@ function FitToRoutes({ routeOptions }) {
     }
   }, [routeOptions, map]);
   return null;
+}
+
+// Wraps a road/route's endpoint coordinates, fetches a real road path
+// between them, and renders it as a Polyline. Falls back to a smoothed
+// straight-line path if the road-routing request fails.
+function RoadFollowingLine({ coordinates, pathOptions, children }) {
+  const [resolvedPath, setResolvedPath] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function resolvePath() {
+      // For multi-point paths, fetch road segments between each consecutive pair
+      const segments = [];
+      for (let i = 0; i < coordinates.length - 1; i++) {
+        const segment = await fetchRoadPath(coordinates[i], coordinates[i + 1]);
+        if (!segment) {
+          if (!cancelled) setResolvedPath(smoothPath(coordinates));
+          return;
+        }
+        segments.push(segment);
+      }
+      if (!cancelled) setResolvedPath(segments.flat());
+    }
+    resolvePath();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(coordinates)]);
+
+  if (!resolvedPath) return null; // wait for the road path before drawing
+
+  return (
+    <Polyline positions={resolvedPath} pathOptions={pathOptions}>
+      {children}
+    </Polyline>
+  );
 }
 
 function MapView({ height = "h-96", mode = "region", routeOptions = [], selectedRouteId = null, vehiclePosition = null, vehicleLabel = null }) {
@@ -69,13 +110,12 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
           <>
             <FitToRoutes routeOptions={routeOptions} />
 
-            {/* Only this vehicle's route options — non-selected ones dimmed */}
             {routeOptions.map((option) => {
               const isSelected = option.id === selectedRouteId;
               return (
-                <Polyline
+                <RoadFollowingLine
                   key={option.id}
-                  positions={smoothPath(option.coordinates)}
+                  coordinates={option.coordinates}
                   pathOptions={{
                     color: isSelected ? (ROUTE_RISK_COLORS[option.riskLevel] || "#1d4ed8") : "#94a3b8",
                     weight: isSelected ? 6 : 3,
@@ -90,11 +130,10 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
                     <br />
                     {isSelected ? "Currently selected" : "Not selected"}
                   </Popup>
-                </Polyline>
+                </RoadFollowingLine>
               );
             })}
 
-            {/* Only this vehicle's marker */}
             {vehiclePosition && (
               <CircleMarker
                 center={vehiclePosition}
@@ -107,11 +146,10 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
           </>
         ) : (
           <>
-            {/* Region mode: all roads */}
             {mockRoads.map((road) => (
-              <Polyline
+              <RoadFollowingLine
                 key={road.id}
-                positions={smoothPath(road.coordinates)}
+                coordinates={road.coordinates}
                 pathOptions={{
                   color: STATUS_COLORS[road.status] || "#94a3b8",
                   weight: 5,
@@ -131,10 +169,9 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
                     </>
                   )}
                 </Popup>
-              </Polyline>
+              </RoadFollowingLine>
             ))}
 
-                        {/* Region mode: all vehicles (skip any that haven't picked a route yet) */}
             {liveVehicles.filter((v) => v.coordinates).map((v) => (
               <CircleMarker
                 key={v.id}
@@ -157,7 +194,6 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
         )}
       </MapContainer>
 
-      {/* legend */}
       <div className="absolute bottom-3 right-3 z-[1000] bg-white border border-slate-200 rounded-sm px-3 py-2 text-xs space-y-1 shadow-sm">
         {isDriverMode ? (
           <>
