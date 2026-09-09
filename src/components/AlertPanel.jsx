@@ -16,7 +16,7 @@ const BORDER_COLORS = {
   medium: "border-yellow-400",
 };
 
-function AlertPanel({ alerts }) {
+function AlertPanel({ alerts, onAcknowledge }) {
   return (
     <div className="bg-white border border-slate-200 rounded-sm divide-y divide-slate-100">
       {alerts.map((alert) => (
@@ -32,6 +32,18 @@ function AlertPanel({ alerts }) {
             <span className="text-xs text-slate-400">{formatTime(alert.time)}</span>
           </div>
           <p className="text-sm text-slate-600 mt-2">{alert.description}</p>
+          {alert.emergencyReport && (
+            <div className="mt-3 bg-slate-50 border border-slate-200 rounded-sm p-3 text-xs text-slate-600 space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold text-slate-700">Driver report · {alert.emergencyReport.vehicleId}</span>
+                <span className={alert.deliveryStatus === "queued" ? "text-amber-700" : "text-green-700"}>{alert.deliveryStatus === "queued" ? "Queued — no signal" : "Delivered"}</span>
+              </div>
+              <p>Status: <strong>{alert.emergencyReport.driverStatus}</strong> · Last known: {alert.emergencyReport.lastKnownLocation}</p>
+              {alert.emergencyReport.contactNumber && <p>Driver contact: <a className="font-medium text-blue-700" href={`tel:${alert.emergencyReport.contactNumber}`}>{alert.emergencyReport.contactNumber}</a></p>}
+              {alert.emergencyReport.routeName && <p>Assigned route: {alert.emergencyReport.routeName}</p>}
+              {alert.acknowledgementStatus === "acknowledged" ? <p className="text-green-700 font-medium">Control room acknowledged this report.</p> : <button onClick={() => onAcknowledge?.(alert.id)} className="mt-1 text-xs font-semibold text-blue-700 hover:text-blue-800">Acknowledge and begin response</button>}
+            </div>
+          )}
         </div>
       ))}
     </div>

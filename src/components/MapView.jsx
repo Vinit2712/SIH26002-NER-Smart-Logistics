@@ -85,7 +85,7 @@ function RoadFollowingLine({ coordinates, pathOptions, children }) {
   );
 }
 
-function MapView({ height = "h-96", mode = "region", routeOptions = [], selectedRouteId = null, vehiclePosition = null, vehicleLabel = null }) {
+function MapView({ height = "h-96", mode = "region", routeOptions = [], selectedRouteId = null, landslideEvents = [], vehiclePosition = null, vehicleLabel = null }) {
   const isDriverMode = mode === "driver";
   const { vehicles: liveVehicles } = useVehicles();
 
@@ -143,6 +143,25 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
                 <Popup>{vehicleLabel || "Your vehicle"}</Popup>
               </CircleMarker>
             )}
+
+            {landslideEvents.map((event) => (
+              <CircleMarker
+                key={event.id}
+                center={event.coordinates}
+                radius={7}
+                pathOptions={{ color: "white", weight: 2, fillColor: "#d97706", fillOpacity: 1 }}
+              >
+                <Popup>
+                  <strong>Historical landslide</strong>
+                  <br />
+                  {event.location}
+                  <br />
+                  {event.date} · {event.trigger}
+                  <br />
+                  {event.distanceFromRouteKm.toFixed(1)} km from selected route
+                </Popup>
+              </CircleMarker>
+            ))}
           </>
         ) : (
           <>
@@ -208,6 +227,10 @@ function MapView({ height = "h-96", mode = "region", routeOptions = [], selected
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-blue-700"></span>
               Your Vehicle
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-amber-600"></span>
+              Historical Landslide
             </div>
           </>
         ) : (

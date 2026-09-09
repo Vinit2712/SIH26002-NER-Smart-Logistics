@@ -2,7 +2,7 @@ import AlertPanel from "../components/AlertPanel";
 import { useAlerts } from "../context/AlertsContext";
 
 function Alerts() {
-  const { alerts, loading } = useAlerts();
+  const { alerts, loading, acknowledgeAlert } = useAlerts();
 
   if (loading) {
     return <p className="text-slate-500 text-sm">Loading alerts...</p>;
@@ -17,7 +17,7 @@ function Alerts() {
         </p>
       </div>
 
-      <AlertPanel alerts={alerts} />
+      <AlertPanel alerts={alerts} onAcknowledge={acknowledgeAlert} />
     </div>
   );
 }

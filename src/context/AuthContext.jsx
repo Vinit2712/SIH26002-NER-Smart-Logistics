@@ -27,12 +27,12 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  function loginDriver(vehicleId, password) {
+  function loginDriver(vehicleId, password, contactNumber) {
     const match = driverCredentials.find(
       (d) => d.vehicleId === vehicleId && d.password === password
     );
-    if (match) {
-      setUser({ role: "driver", vehicleId: match.vehicleId });
+    if (match && contactNumber) {
+      setUser({ role: "driver", vehicleId: match.vehicleId, contactNumber });
       return true;
     }
     return false;

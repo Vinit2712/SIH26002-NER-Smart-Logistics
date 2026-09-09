@@ -7,6 +7,9 @@ import { getRouteForPair } from "../services/api";
 import { knownLocations } from "../mockData/locations";
 import RouteCard from "../components/RouteCard";
 import MapView from "../components/MapView";
+import LandslideHistory from "../components/LandslideHistory";
+import { getLandslidesNearRoute } from "../mockData/landslides";
+import EmergencyReportModal from "../components/EmergencyReportModal";
 
 function DriverDashboard() {
   const { user } = useAuth();
@@ -15,6 +18,7 @@ function DriverDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [alertSent, setAlertSent] = useState(false);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
 
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
@@ -22,6 +26,7 @@ function DriverDashboard() {
   const [selectedRouteId, setSelectedRouteId] = useState(null);
 
   const myVehicle = vehicles.find((v) => v.id === user.vehicleId);
+  const endpointsLocked = myVehicle?.routeAssignmentMode === "admin";
 
   useEffect(() => {
     async function loadDefaultRoute() {
@@ -41,6 +46,7 @@ function DriverDashboard() {
   }, []);
 
   async function handleFindRoute() {
+    if (endpointsLocked) return;
     const result = await getRouteForPair(origin, destination);
     if (result) {
       setActiveRouteSet(result);
@@ -64,12 +70,23 @@ function DriverDashboard() {
     console.log("updateVehicle called");
   }
 
-  function handleEmergency() {
+  function handleEmergencyReport(report) {
     addAlert({
       severity: "critical",
       location: `Vehicle ${user.vehicleId}${activeRouteSet ? ` — ${origin} → ${destination}` : ""}`,
-      description: `Emergency alert raised by driver of vehicle ${user.vehicleId}. Immediate attention required.`,
+      description: `${report.type}: ${report.driverStatus}${report.details ? ` — ${report.details}` : ""}`,
+      emergencyReport: {
+        ...report,
+        vehicleId: user.vehicleId,
+        routeName: selectedRoute?.roadName || null,
+        origin,
+        destination,
+        coordinates: myVehicle?.coordinates || null,
+        lastKnownLocation: myVehicle?.currentLocation || origin,
+        contactNumber: user.contactNumber,
+      },
     });
+    setEmergencyOpen(false);
     setAlertSent(true);
     setTimeout(() => setAlertSent(false), 4000);
   }
@@ -85,6 +102,8 @@ function DriverDashboard() {
   const routeOptions = activeRouteSet
     ? [activeRouteSet.recommended, activeRouteSet.alternative, activeRouteSet.alternative2].filter(Boolean)
     : [];
+  const selectedRoute = routeOptions.find((route) => route.id === selectedRouteId);
+  const landslideEvents = selectedRoute ? getLandslidesNearRoute(selectedRoute.coordinates) : [];
 
   return (
     <div className="space-y-6 printable-area">
@@ -114,6 +133,7 @@ function DriverDashboard() {
           <select
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
+            disabled={endpointsLocked}
             className="w-full mt-1 border border-slate-300 rounded-sm px-3 py-2 text-sm text-slate-700"
           >
             <option value="">Select origin</option>
@@ -130,6 +150,7 @@ function DriverDashboard() {
           <select
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
+            disabled={endpointsLocked}
             className="w-full mt-1 border border-slate-300 rounded-sm px-3 py-2 text-sm text-slate-700"
           >
             <option value="">Select destination</option>
@@ -141,10 +162,10 @@ function DriverDashboard() {
 
         <button
           onClick={handleFindRoute}
-          disabled={!origin || !destination || origin === destination}
+          disabled={endpointsLocked || !origin || !destination || origin === destination}
           className="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-300 text-white text-sm font-medium px-5 py-2 rounded-sm"
         >
-          Find Route
+          {endpointsLocked ? "Admin Assigned" : "Find Route"}
         </button>
       </div>
 
@@ -194,7 +215,7 @@ function DriverDashboard() {
                 If you are facing a breakdown, accident, or blocked road, alert government officials immediately.
               </p>
               <button
-                onClick={handleEmergency}
+                onClick={() => setEmergencyOpen(true)}
                 disabled={alertSent}
                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-sm text-sm font-semibold text-white ${
                   alertSent ? "bg-green-600" : "bg-red-600 hover:bg-red-700"
@@ -215,19 +236,31 @@ function DriverDashboard() {
             </div>
           </div>
 
-          {/* Right: map */}
-          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-sm p-4">
-            <h2 className="text-sm font-semibold text-slate-700 mb-3">Live Route Map</h2>
-            <MapView
-              height="h-[480px]"
-              mode="driver"
-              routeOptions={routeOptions}
-              selectedRouteId={selectedRouteId}
-              vehiclePosition={myVehicle?.coordinates}
-              vehicleLabel={user.vehicleId}
-            />
+          {/* Right: route map and incident history */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white border border-slate-200 rounded-sm p-4">
+              <h2 className="text-sm font-semibold text-slate-700 mb-3">Live Route Map</h2>
+              <MapView
+                height="h-[480px]"
+                mode="driver"
+                routeOptions={routeOptions}
+                selectedRouteId={selectedRouteId}
+                landslideEvents={landslideEvents}
+                vehiclePosition={myVehicle?.coordinates}
+                vehicleLabel={user.vehicleId}
+              />
+            </div>
+            <LandslideHistory events={landslideEvents} routeName={selectedRoute?.roadName} currentRiskScore={selectedRoute?.riskScore} />
           </div>
         </div>
+      )}
+      {emergencyOpen && (
+        <EmergencyReportModal
+          vehicle={myVehicle}
+          route={selectedRoute}
+          onClose={() => setEmergencyOpen(false)}
+          onSubmit={handleEmergencyReport}
+        />
       )}
     </div>
   );

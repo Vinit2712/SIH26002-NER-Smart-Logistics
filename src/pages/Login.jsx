@@ -7,6 +7,7 @@ function Login() {
   const [role, setRole] = useState("driver"); // "driver" | "govt"
   const [idOrUsername, setIdOrUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [error, setError] = useState("");
 
   const { loginDriver, loginGovt } = useAuth();
@@ -17,7 +18,7 @@ function Login() {
     setError("");
 
     if (role === "driver") {
-      const success = loginDriver(idOrUsername.trim(), password);
+      const success = loginDriver(idOrUsername.trim(), password, contactNumber.trim());
       if (success) {
         navigate("/driver");
       } else {
@@ -94,6 +95,14 @@ function Login() {
               required
             />
           </div>
+
+          {role === "driver" && (
+            <div>
+              <label className="text-xs font-medium text-slate-500 uppercase">Contact Number</label>
+              <input type="tel" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} placeholder="e.g. +91 98765 43210" className="w-full mt-1 border border-slate-300 rounded-sm px-3 py-2 text-sm" required />
+              <p className="text-[11px] text-slate-400 mt-1">Used by the control room only for emergency follow-up.</p>
+            </div>
+          )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 

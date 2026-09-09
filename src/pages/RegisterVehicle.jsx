@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useVehicles } from "../context/VehiclesContext";
+import { knownLocations } from "../mockData/locations";
 
 function RegisterVehicle() {
   const { registerDriverCredential } = useAuth();
@@ -10,6 +11,9 @@ function RegisterVehicle() {
   const [vehicleId, setVehicleId] = useState("");
   const [password, setPassword] = useState("");
   const [commodity, setCommodity] = useState("");
+  const [routeAssignmentMode, setRouteAssignmentMode] = useState("admin");
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
@@ -22,6 +26,10 @@ function RegisterVehicle() {
       setError("Please fill in all fields.");
       return;
     }
+    if (routeAssignmentMode === "admin" && (!origin || !destination || origin === destination)) {
+      setError("Choose different starting and final destinations for this assignment.");
+      return;
+    }
 
     const credentialAdded = registerDriverCredential(vehicleId.trim(), password.trim());
     if (!credentialAdded) {
@@ -29,13 +37,12 @@ function RegisterVehicle() {
       return;
     }
 
-    // Vehicle exists in the system, but with no route yet —
-    // the supplier will choose their own origin/destination on login.
     addVehicle({
       id: vehicleId.trim(),
-      origin: null,
-      destination: null,
-      currentLocation: "Not yet assigned",
+      origin: routeAssignmentMode === "admin" ? origin : null,
+      destination: routeAssignmentMode === "admin" ? destination : null,
+      routeAssignmentMode,
+      currentLocation: routeAssignmentMode === "admin" ? origin : "Not yet assigned",
       coordinates: null,
       commodity: commodity.trim(),
       status: "on_route",
@@ -46,6 +53,8 @@ function RegisterVehicle() {
     setVehicleId("");
     setPassword("");
     setCommodity("");
+    setOrigin("");
+    setDestination("");
   }
 
   return (
@@ -53,7 +62,7 @@ function RegisterVehicle() {
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Register Vehicle</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Onboard a new vehicle and issue supplier login credentials. The supplier will choose their own route after logging in.
+          Onboard a new vehicle, issue driver credentials, and decide who enters the journey endpoints.
         </p>
       </div>
 
@@ -91,11 +100,38 @@ function RegisterVehicle() {
           />
         </div>
 
+        <fieldset>
+          <legend className="text-xs font-medium text-slate-500 uppercase">Who sets the journey?</legend>
+          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label className={`border rounded-sm p-3 cursor-pointer ${routeAssignmentMode === "admin" ? "border-blue-500 bg-blue-50" : "border-slate-200"}`}>
+              <input type="radio" name="route-assignment" value="admin" checked={routeAssignmentMode === "admin"} onChange={() => setRouteAssignmentMode("admin")} className="mr-2" />
+              <span className="text-sm font-medium text-slate-700">Admin assigns route</span>
+              <span className="block text-xs text-slate-500 mt-1 ml-5">Driver can view, but not change endpoints.</span>
+            </label>
+            <label className={`border rounded-sm p-3 cursor-pointer ${routeAssignmentMode === "driver" ? "border-blue-500 bg-blue-50" : "border-slate-200"}`}>
+              <input type="radio" name="route-assignment" value="driver" checked={routeAssignmentMode === "driver"} onChange={() => setRouteAssignmentMode("driver")} className="mr-2" />
+              <span className="text-sm font-medium text-slate-700">Driver enters route</span>
+              <span className="block text-xs text-slate-500 mt-1 ml-5">Driver selects endpoints after login.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        {routeAssignmentMode === "admin" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="text-xs font-medium text-slate-500 uppercase">Starting destination
+              <select value={origin} onChange={(e) => setOrigin(e.target.value)} className="w-full mt-1 border border-slate-300 rounded-sm px-3 py-2 text-sm text-slate-700"><option value="">Select start</option>{knownLocations.map((loc) => <option key={loc.name} value={loc.name}>{loc.name}</option>)}</select>
+            </label>
+            <label className="text-xs font-medium text-slate-500 uppercase">Final destination
+              <select value={destination} onChange={(e) => setDestination(e.target.value)} className="w-full mt-1 border border-slate-300 rounded-sm px-3 py-2 text-sm text-slate-700"><option value="">Select end</option>{knownLocations.map((loc) => <option key={loc.name} value={loc.name}>{loc.name}</option>)}</select>
+            </label>
+          </div>
+        )}
+
         {error && <p className="text-sm text-red-600">{error}</p>}
         {success && (
           <p className="text-sm text-green-600 flex items-center gap-1.5">
             <CheckCircle2 size={16} />
-            Vehicle registered successfully. Driver can now log in and select their route.
+            Vehicle registered successfully. {routeAssignmentMode === "admin" ? "The assigned endpoints are ready for the driver." : "The driver can choose endpoints after logging in."}
           </p>
         )}
 
