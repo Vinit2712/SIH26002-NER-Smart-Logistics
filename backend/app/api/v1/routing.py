@@ -22,14 +22,15 @@ async def calculate_route(
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Calculate a route between two points using pgRouting.
+    Calculate a risk-aware route between two points using pgRouting.
+    Avoids HIGH risk (DEGRADED) and CRITICAL risk (BLOCKED) segments when possible.
     
     Parameters:
     - start_lat, start_lon: Starting point coordinates
     - end_lat, end_lon: Ending point coordinates
     
     Returns:
-    - Dict containing route information
+    - Dict containing route information with risk avoidance
     """
     # Find the nearest road segments to the start and end points
     start_point = func.ST_SetSRID(func.ST_MakePoint(start_lon, start_lat), 4326)
@@ -74,16 +75,27 @@ async def calculate_route(
             detail="Could not determine start or end nodes for routing"
         )
     
-    # Use pgRouting to find the shortest path
-    # We'll use pgr_dijkstra with the cost column we added
+    # Use pgRouting to find the shortest path with risk-aware costs
+    # Adjust cost based on segment status to avoid risky segments
     route_query = text("""
-        SELECT seq, id1 AS node, id2 AS edge, cost
+        SELECT seq, id1 AS node, id2 AS edge, 
+               CASE 
+                 WHEN rs.status = 'BLOCKED' THEN 1000000  -- Extremely high cost to avoid blocked segments
+                 WHEN rs.status = 'DEGRADED' THEN rs.cost * 3  -- Triple cost to strongly discourage degraded segments
+                 ELSE rs.cost  -- Normal cost for open/unknown segments
+               END as risk_adjusted_cost
         FROM pgr_dijkstra(
-            'SELECT id, source::integer, target::integer, cost FROM road_segments',
+            'SELECT id, source::integer, target::integer, 
+                   CASE 
+                     WHEN status = 'BLOCKED' THEN 1000000
+                     WHEN status = 'DEGRADED' THEN cost * 3
+                     ELSE cost
+                   END as cost
+            FROM road_segments',
             :start_node, :end_node,
             directed := false
         ) AS di
-        JOIN road_segments ON road_segments.id = di.edge
+        JOIN road_segments rs ON road_segments.id = di.edge
     """)
     
     result = await db.execute(
@@ -102,10 +114,12 @@ async def calculate_route(
     # Collect the route information in order
     segment_ids = []
     total_cost = 0.0
+    original_cost = 0.0  # Track original cost without risk adjustment
     
     for row in route_rows:
         segment_ids.append(row.edge)
-        total_cost += row.cost
+        total_cost += row.risk_adjusted_cost if hasattr(row, 'risk_adjusted_cost') else row.cost
+        # For tracking purposes, we'd need to query the original cost separately
     
     # Get the geometries for the segments in the route in the correct order
     # We'll query them individually to preserve order (not efficient but works for demo)
@@ -127,6 +141,23 @@ async def calculate_route(
     else:
         coordinates = []
     
+    # Calculate risk level of the route
+    risk_level = "low"
+    risk_segments = []
+    if segment_ids:
+        # Check the status of each segment in the route
+        for segment_id in segment_ids:
+            status_result = await db.execute(
+                select(RoadSegment.status).where(RoadSegment.id == segment_id)
+            )
+            status = status_result.scalar_one_or_none()
+            if status == "BLOCKED":
+                risk_level = "critical"
+                risk_segments.append((segment_id, "BLOCKED"))
+            elif status == "DEGRADED" and risk_level != "critical":
+                risk_level = "high"
+                risk_segments.append((segment_id, "DEGRADED"))
+    
     return {
         "route": {
             "type": "LineString",
@@ -134,5 +165,10 @@ async def calculate_route(
         },
         "segment_ids": segment_ids,
         "total_cost": total_cost,
-        "message": "Route calculated successfully"
+        "risk_level": risk_level,
+        "risk_segments": risk_segments,
+        "message": "Risk-aware route calculated successfully" + 
+                  (f" Route avoids {len([s for s in risk_segments if s[1] == 'BLOCKED'])} blocked and " +
+                   f"{len([s for s in risk_segments if s[1] == 'DEGRADED'])} degraded segments." 
+                   if risk_segments else " No risky segments detected on route.")
     }

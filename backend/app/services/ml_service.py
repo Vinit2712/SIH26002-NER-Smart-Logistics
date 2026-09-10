@@ -160,7 +160,7 @@ class MLService:
                         value = 150.0  # Extreme threshold by default
 
                 # Convert to appropriate type
-                if feature_name in ["landslide_susceptibility_class", "annual_normal_mm"]:
+                if feature_name in ["landslide_susceptibility_class"]:
                     # These should be integers according to feature_types in the model
                     value = int(float(value))
                 else:

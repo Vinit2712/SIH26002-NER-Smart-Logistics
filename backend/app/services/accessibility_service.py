@@ -46,7 +46,7 @@ class AccessibilityService:
         # The incident is associated with a segment via nearest point, so we assume it does.
         return not AccessibilityService._is_blocking_incident(incident_type, severity)
 
-    async def _get_active_verifed_incidents_for_segment(self, segment_id: int):
+    async def _get_active_verified_incidents_for_segment(self, segment_id: int):
         """
         Retrieve all verified but not resolved incidents for a given segment.
         """
@@ -66,7 +66,7 @@ class AccessibilityService:
         Calculate the accessibility status for a segment based on active verified incidents.
         Returns the new status string based solely on incidents (ignores manual override).
         """
-        incidents = await self._get_active_verifed_incidents_for_segment(segment_id)
+        incidents = await self._get_active_verified_incidents_for_segment(segment_id)
 
         if not incidents:
             return "OPEN"
@@ -145,7 +145,7 @@ class AccessibilityService:
         # If we have incidents, we need to set the reason based on the incidents
         if incident_based_status != "OPEN":
             # Get the active verified incidents again to build the reason
-            incidents = await self._get_active_verifed_incidents_for_segment(segment_id)
+            incidents = await self._get_active_verified_incidents_for_segment(segment_id)
             if incidents:
                 # We'll take the first incident that matches the status
                 for incident in incidents:
